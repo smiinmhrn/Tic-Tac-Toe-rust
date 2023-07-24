@@ -1,7 +1,7 @@
 use std::io;
 use rand::thread_rng;
 use rand::seq::SliceRandom;
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Copy, Clone)]
 enum GameBoardCells {
     X,
     O,
@@ -108,10 +108,12 @@ fn play_with_user(){
         count += 1;
 
         if result {
+            print_game_board(&vectors.0);
             println!("Player1 won!");
             break;
         }
         if count == 13 {
+            print_game_board(&vectors.0);
             println!("That is a tie!");
             break;
         }
@@ -121,6 +123,7 @@ fn play_with_user(){
         count += 1;
 
         if result {
+            print_game_board(&vectors.0);
             println!("Player2 won!");
             break;
         }
@@ -137,18 +140,21 @@ fn play_with_computer(){
         count += 1;
 
         if result {
+            print_game_board(&vectors.0);
             println!("Player1 won!");
             break;
         }
         if count == 13 {
+            print_game_board(&vectors.0);
             println!("That is a tie!");
             break;
         }
         print_game_board(&vectors.0);
         result = computer_move(&mut vectors.1,&mut vectors.0);
         count += 1;
-        
+
         if result {
+            print_game_board(&vectors.0);
             println!("computer won!");
             break;
         }
@@ -234,8 +240,52 @@ fn winner_cheack(game_board: &Vec<GameBoardCells>) -> bool {
         }
     }
 
-    // for i in 0..4 {
-        
-    // }
+    repetition = 0;
+    cell_check = GameBoardCells::BLANK;
+    for j in 0..4 {
+
+        for i in 0..4 {
+            if i == j{
+                let index = i * 4 + j;
+
+                if cell_check == game_board[index] {
+                    repetition +=1;
+                    
+                    if cell_check != GameBoardCells::BLANK && repetition == 3 {
+                        return true;
+                    }
+                }else {
+                    cell_check = game_board[index];
+                    repetition = 1;
+                }
+            }else {
+                continue;
+            }
+
+        }
+    }
+
+    repetition = 0;
+    cell_check = GameBoardCells::BLANK;
+    for i in 0..4 {
+        for j in 0..4 {
+            if i + j == 3{
+                let index = j * 4 + i;
+
+                if cell_check == game_board[index] {
+                    repetition +=1;
+    
+                    if cell_check != GameBoardCells::BLANK && repetition == 3 {
+                        return true;
+                    }
+                }else {
+                    cell_check = game_board[index];
+                    repetition = 1;
+                }
+            }else {
+                continue;
+            }
+        }
+    }
     false
 }
