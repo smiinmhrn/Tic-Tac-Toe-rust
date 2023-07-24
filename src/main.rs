@@ -1,6 +1,6 @@
 use std::io;
 use rand::thread_rng;
-use rand::seq::SliceRandom;
+use rand::seq::{SliceRandom, index};
 enum GameBoardCells {
     X,
     O,
@@ -26,7 +26,7 @@ fn start_menu() {
                 break;
             }
             2 => {
-                user();
+                play_with_user();
                 break;
             }
             _ => {
@@ -67,7 +67,7 @@ fn creating_game_board() -> (Vec<GameBoardCells>, Vec<usize>) {
     random_num.shuffle(&mut rng);
     
     for _ in 0..3 {
-        game_board[random_num[0]] = GameBoardCells::LOCK;
+        game_board[random_num[0] as usize] = GameBoardCells::LOCK;
         random_num.remove(0);
     }
     
@@ -75,10 +75,11 @@ fn creating_game_board() -> (Vec<GameBoardCells>, Vec<usize>) {
 }
 
 fn print_game_board(game_board: &Vec<GameBoardCells>) {
+    println!("[ Game started ]");
     for i in 0..16 {
         match game_board[i] {
             GameBoardCells::BLANK => {
-                if (i+1) < 10 {
+                if (i + 1) < 10 {
                     print!("{} |", i + 1)
                 }else {
                     print!("{}|", i + 1)
@@ -95,9 +96,62 @@ fn print_game_board(game_board: &Vec<GameBoardCells>) {
     }
 }
 
-fn user(){
-    print_game_board(&creating_game_board().0);
+fn play_with_user(){
+
+    let mut vectors = creating_game_board();
+
+    loop {
+        print_game_board(&vectors.0);
+        let mut result = users_move(&mut vectors.1,&mut vectors.0, 1);
+        if result {
+            println!("Player1 won!");
+            break;
+        }
+
+        print_game_board(&vectors.0);
+        result = users_move(&mut vectors.1,&mut vectors.0, 2);
+        if result {
+            println!("Player2 won!");
+            break;
+        }
+    }
 }
+
 fn computer(){
     print_game_board(&creating_game_board().0);
+}
+
+fn users_move(users_choices: &mut Vec<usize>, game_board: &mut Vec<GameBoardCells>, turn: i8) -> bool {
+
+    // println!("Vector elements: {:?}", users_choices);
+
+    println!("Player{} make your move: ", turn);
+    let mut user_move = (convert_string_into_int(take_input_from_user()) - 1) as usize;
+
+    loop {
+        if users_choices.contains(&user_move) {
+
+            let index = users_choices.iter().position(|x| *x == user_move).unwrap();
+            users_choices.remove(index);
+
+            match turn {
+                1 => {
+                    game_board[user_move] = GameBoardCells::X;
+                    return winner_cheack();
+                }
+                2 => {
+                    game_board[user_move] = GameBoardCells::O;
+                    return winner_cheack();
+                }
+                _ => ()
+            }
+        }else {
+            println!("invalide choice! please try again");
+            user_move = (convert_string_into_int(take_input_from_user()) - 1) as usize;
+        }
+    }
+}
+
+fn winner_cheack() -> bool {
+    false
 }
