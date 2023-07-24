@@ -1,6 +1,6 @@
 use std::io;
 use rand::thread_rng;
-use rand::seq::{SliceRandom, index};
+use rand::seq::SliceRandom;
 enum GameBoardCells {
     X,
     O,
@@ -22,7 +22,7 @@ fn start_menu() {
     loop {
         match user_choice {
             1 => {
-                computer();
+                play_with_computer();
                 break;
             }
             2 => {
@@ -58,7 +58,7 @@ fn creating_game_board() -> (Vec<GameBoardCells>, Vec<usize>) {
     let mut game_board: Vec<GameBoardCells> = vec![];
     let mut random_num: Vec<usize> = vec![];
 
-    for i in 0..16 {
+    for i in 1..17 {
         game_board.push(GameBoardCells::BLANK);
         random_num.push(i);
     }
@@ -67,7 +67,7 @@ fn creating_game_board() -> (Vec<GameBoardCells>, Vec<usize>) {
     random_num.shuffle(&mut rng);
     
     for _ in 0..3 {
-        game_board[random_num[0] as usize] = GameBoardCells::LOCK;
+        game_board[(random_num[0] - 1) as usize] = GameBoardCells::LOCK;
         random_num.remove(0);
     }
     
@@ -117,16 +117,29 @@ fn play_with_user(){
     }
 }
 
-fn computer(){
-    print_game_board(&creating_game_board().0);
+fn play_with_computer(){
+    let mut vectors = creating_game_board();
+
+    loop {
+        print_game_board(&vectors.0);
+        let mut result = users_move(&mut vectors.1,&mut vectors.0, 1);
+        if result {
+            println!("Player1 won!");
+            break;
+        }
+        print_game_board(&vectors.0);
+        result = computer_move(&mut vectors.1,&mut vectors.0);
+        if result {
+            println!("computer won!");
+            break;
+        }
+    }
 }
 
 fn users_move(users_choices: &mut Vec<usize>, game_board: &mut Vec<GameBoardCells>, turn: i8) -> bool {
-
-    // println!("Vector elements: {:?}", users_choices);
-
+    
     println!("Player{} make your move: ", turn);
-    let mut user_move = (convert_string_into_int(take_input_from_user()) - 1) as usize;
+    let mut user_move = convert_string_into_int(take_input_from_user()) as usize;
 
     loop {
         if users_choices.contains(&user_move) {
@@ -136,20 +149,28 @@ fn users_move(users_choices: &mut Vec<usize>, game_board: &mut Vec<GameBoardCell
 
             match turn {
                 1 => {
-                    game_board[user_move] = GameBoardCells::X;
+                    game_board[user_move - 1] = GameBoardCells::X;
                     return winner_cheack();
                 }
                 2 => {
-                    game_board[user_move] = GameBoardCells::O;
+                    game_board[user_move - 1] = GameBoardCells::O;
                     return winner_cheack();
                 }
                 _ => ()
             }
         }else {
             println!("invalide choice! please try again");
-            user_move = (convert_string_into_int(take_input_from_user()) - 1) as usize;
+            user_move = convert_string_into_int(take_input_from_user()) as usize;
         }
     }
+}
+
+fn computer_move(computer_choices: &mut Vec<usize>, game_board: &mut Vec<GameBoardCells>) -> bool{
+
+    let computer_move = computer_choices[0];
+    game_board[computer_move - 1] = GameBoardCells::O;
+    computer_choices.remove(0);
+    return winner_cheack();
 }
 
 fn winner_cheack() -> bool {
